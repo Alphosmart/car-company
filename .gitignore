@@ -1,0 +1,28 @@
+# Node dependencies
+node_modules/
+**/node_modules/
+
+# Next.js outputs
+.next/
+**/.next/
+out/
+
+# Build and cache
+coverage/
+dist/
+build/
+*.log
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# OS/editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Prisma/local temp
+**/.tmp-*.log
