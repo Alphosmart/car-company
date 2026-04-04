@@ -79,6 +79,10 @@ router.post("/", async (req, res) => {
   try {
     const { name, phone, email, message, carId, source = "website", recaptchaToken } = req.body;
 
+    // Accept referral code from body, query, or tracking cookie.
+    const referralCode =
+      req.body.referralCode || req.query.ref || req.cookies?.referralCode || null;
+
     if (!name || !phone || !carId) {
       return res.status(400).json({ error: "Name, phone, and carId are required" });
     }
@@ -112,25 +116,35 @@ router.post("/", async (req, res) => {
     });
 
     if (!customer) {
+      const referral = referralCode
+        ? await prisma.referral.findUnique({ where: { code: referralCode } })
+        : null;
+
       customer = await prisma.customer.create({
         data: {
           name,
           phone,
           email,
           referralCode: require("crypto").randomUUID(),
+          referredBy: referral?.code || null,
         },
       });
-    } else if (email && !customer.email) {
-      // Update email if provided and customer didn't have one
+    } else if ((email && !customer.email) || (referralCode && !customer.referredBy)) {
+      // Backfill email/referral metadata on existing customer when missing.
+      const referral = referralCode
+        ? await prisma.referral.findUnique({ where: { code: referralCode } })
+        : null;
+
+      const updateData = {
+        ...(email && !customer.email ? { email } : {}),
+        ...(referral?.code && !customer.referredBy ? { referredBy: referral.code } : {}),
+      };
+
       customer = await prisma.customer.update({
         where: { phone },
-        data: { email },
+        data: updateData,
       });
     }
-
-    // Accept referral code from body, query, or tracking cookie.
-    const referralCode =
-      req.body.referralCode || req.query.ref || req.cookies?.referralCode || null;
 
     // Create lead
     const lead = await prisma.lead.create({
