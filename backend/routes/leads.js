@@ -19,6 +19,11 @@ router.get("/", authMiddleware, roleCheck(["admin", "manager", "sales_rep"]), as
     const createdAtFilter = getDateFilterFromRangeToken(dateRange);
     if (createdAtFilter) where.createdAt = createdAtFilter;
 
+    // Sales reps are restricted to leads assigned to them.
+    if (req.staff.role === "sales_rep") {
+      where.staffId = req.staff.staffId;
+    }
+
     const skip = (parseInt(page) - 1) * parseInt(limit);
 
     const [leads, total] = await Promise.all([
@@ -65,6 +70,10 @@ router.get("/:id", authMiddleware, roleCheck(["admin", "manager", "sales_rep"]),
 
     if (!lead) {
       return res.status(404).json({ error: "Lead not found" });
+    }
+
+    if (req.staff.role === "sales_rep" && lead.staffId !== req.staff.staffId) {
+      return res.status(403).json({ error: "Insufficient permissions" });
     }
 
     res.json(lead);
@@ -198,6 +207,24 @@ router.patch("/:id", authMiddleware, roleCheck(["admin", "manager", "sales_rep"]
   try {
     const { id } = req.params;
     const updates = req.body;
+
+    if (req.staff.role === "sales_rep") {
+      const existingLead = await prisma.lead.findUnique({
+        where: { id },
+        select: { id: true, staffId: true },
+      });
+
+      if (!existingLead) {
+        return res.status(404).json({ error: "Lead not found" });
+      }
+
+      if (existingLead.staffId !== req.staff.staffId) {
+        return res.status(403).json({ error: "Insufficient permissions" });
+      }
+
+      // Sales reps cannot reassign ownership through generic patch updates.
+      delete updates.staffId;
+    }
 
     const lead = await prisma.lead.update({
       where: { id },
