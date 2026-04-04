@@ -1,0 +1,103 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Car {
+  id           String   @id @default(uuid())
+  make         String
+  model        String
+  year         Int
+  price        Float
+  mileage      Int
+  condition    String
+  fuelType     String
+  transmission String
+  color        String
+  description  String?
+  status       String   @default("available")
+  photos       String[]
+  featured     Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  leads        Lead[]
+  purchases    Purchase[]
+}
+
+model Customer {
+  id           String     @id @default(uuid())
+  name         String
+  email        String?    @unique
+  phone        String     @unique
+  address      String?
+  referralCode String?    @unique @default(uuid())
+  referredBy   String?
+  createdAt    DateTime   @default(now())
+  leads        Lead[]
+  purchases    Purchase[]
+}
+
+model Lead {
+  id         String    @id @default(uuid())
+  name       String
+  phone      String
+  email      String?
+  message    String?
+  referralCode String?
+  source     String    @default("website")
+  status     String    @default("new")
+  notes      String?
+  followUpAt DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  car        Car       @relation(fields: [carId], references: [id])
+  carId      String
+  customer   Customer? @relation(fields: [customerId], references: [id])
+  customerId String?
+  assignedTo Staff?    @relation(fields: [staffId], references: [id])
+  staffId    String?
+}
+
+model Purchase {
+  id          String   @id @default(uuid())
+  salePrice   Float
+  purchasedAt DateTime @default(now())
+  customer    Customer @relation(fields: [customerId], references: [id])
+  customerId  String
+  car         Car      @relation(fields: [carId], references: [id])
+  carId       String
+}
+
+model Staff {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      String   @default("sales_rep")
+  createdAt DateTime @default(now())
+  leads     Lead[]
+}
+
+model Referral {
+  id         String   @id @default(uuid())
+  code       String   @unique
+  referrerId String
+  referredId String?
+  converted  Boolean  @default(false)
+  rewardPaid Boolean  @default(false)
+  createdAt  DateTime @default(now())
+}
+
+model NotificationLog {
+  id         String   @id @default(uuid())
+  channel    String
+  recipient  String?
+  status     String
+  context    String?
+  payload    Json?
+  error      String?
+  createdAt  DateTime @default(now())
+}
