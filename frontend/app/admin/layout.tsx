@@ -5,9 +5,12 @@ const adminLinks = [
   { href: "/admin", label: "Overview" },
   { href: "/admin/analytics", label: "Analytics" },
   { href: "/admin/cars", label: "Inventory" },
+  { href: "/admin/blog", label: "Blog" },
+  { href: "/admin/test-drives", label: "Test Drives" },
   { href: "/admin/leads", label: "Leads CRM" },
   { href: "/admin/customers", label: "Customers" },
   { href: "/admin/marketing", label: "Marketing" },
+  { href: "/admin/company", label: "Company" },
   { href: "/admin/staff", label: "Staff" },
 ];
 

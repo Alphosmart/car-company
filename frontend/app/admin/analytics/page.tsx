@@ -227,7 +227,7 @@ export default function AdminAnalyticsPage() {
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="month" />
                   <YAxis />
-                  <Tooltip formatter={(value: number) => new Intl.NumberFormat("en-NG").format(value)} />
+                  <Tooltip formatter={(value) => new Intl.NumberFormat("en-NG").format(Number(value ?? 0))} />
                   <Bar dataKey="total" fill="#2563eb" radius={[6, 6, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>

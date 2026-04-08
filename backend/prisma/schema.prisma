@@ -101,3 +101,40 @@ model NotificationLog {
   error      String?
   createdAt  DateTime @default(now())
 }
+
+model BlogPost {
+  id          String   @id @default(uuid())
+  slug        String   @unique
+  title       String
+  excerpt     String
+  category    String
+  publishedAt DateTime @default(now())
+  readTime    String   @default("5 min read")
+  content     String[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model TestDrive {
+  id            String   @id @default(uuid())
+  name          String
+  phone         String
+  email         String?
+  carId         String
+  preferredDate DateTime?
+  status        String   @default("pending")
+  notes         String?
+  customerId    String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model CompanyProfile {
+  id            String   @id @default(uuid())
+  yearsInBusiness Int
+  carsSold      Int
+  happyCustomers Int
+  citiesServed   Int
+  team          Json[]
+  updatedAt     DateTime @updatedAt
+}

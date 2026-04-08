@@ -127,6 +127,19 @@ export type PromoBanner = {
   activeUntil: string | null;
 };
 
+export type CompanyTeamMember = {
+  name: string;
+  role: string;
+};
+
+export type CompanyProfile = {
+  yearsInBusiness: number;
+  carsSold: number;
+  happyCustomers: number;
+  citiesServed: number;
+  team: CompanyTeamMember[];
+};
+
 export async function getPromoBanner(): Promise<PromoBanner> {
   try {
     const response = await fetch(withBase("/api/public/promo-banner"), {
@@ -144,5 +157,50 @@ export async function getPromoBanner(): Promise<PromoBanner> {
     };
   } catch {
     return { text: null, activeUntil: null };
+  }
+}
+
+export async function getCompanyProfile(): Promise<CompanyProfile> {
+  try {
+    const response = await fetch(withBase("/api/company"), {
+      next: { revalidate: 60 },
+    });
+
+    if (!response.ok) {
+      return {
+        yearsInBusiness: 8,
+        carsSold: 1200,
+        happyCustomers: 900,
+        citiesServed: 12,
+        team: [],
+      };
+    }
+
+    const payload = (await response.json()) as Partial<CompanyProfile>;
+
+    return {
+      yearsInBusiness: Number(payload.yearsInBusiness ?? 8),
+      carsSold: Number(payload.carsSold ?? 1200),
+      happyCustomers: Number(payload.happyCustomers ?? 900),
+      citiesServed: Number(payload.citiesServed ?? 12),
+      team: Array.isArray(payload.team)
+        ? payload.team.filter((member): member is CompanyTeamMember => {
+            return (
+              typeof member === "object" &&
+              member !== null &&
+              typeof member.name === "string" &&
+              typeof member.role === "string"
+            );
+          })
+        : [],
+    };
+  } catch {
+    return {
+      yearsInBusiness: 8,
+      carsSold: 1200,
+      happyCustomers: 900,
+      citiesServed: 12,
+      team: [],
+    };
   }
 }

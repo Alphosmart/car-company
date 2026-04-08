@@ -5,7 +5,7 @@ const roleCheck = require("../middleware/roleCheck");
 const prisma = require("../lib/prisma");
 
 // GET /api/customers - all customers with search [admin only]
-router.get("/", authMiddleware, roleCheck(["admin", "manager"]), async (req, res) => {
+router.get("/", authMiddleware, roleCheck(["admin"]), async (req, res) => {
   try {
     const { search, page = 1, limit = 20 } = req.query;
 
@@ -47,7 +47,7 @@ router.get("/", authMiddleware, roleCheck(["admin", "manager"]), async (req, res
 });
 
 // GET /api/customers/:id - customer profile [admin only]
-router.get("/:id", authMiddleware, roleCheck(["admin", "manager"]), async (req, res) => {
+router.get("/:id", authMiddleware, roleCheck(["admin"]), async (req, res) => {
   try {
     const customer = await prisma.customer.findUnique({
       where: { id: req.params.id },
@@ -116,7 +116,7 @@ router.patch("/:id", authMiddleware, roleCheck(["admin"]), async (req, res) => {
 });
 
 // GET /api/customers/:id/leads - customer inquiries [admin only]
-router.get("/:id/leads", authMiddleware, roleCheck(["admin", "manager"]), async (req, res) => {
+router.get("/:id/leads", authMiddleware, roleCheck(["admin"]), async (req, res) => {
   try {
     const leads = await prisma.lead.findMany({
       where: { customerId: req.params.id },
@@ -132,7 +132,7 @@ router.get("/:id/leads", authMiddleware, roleCheck(["admin", "manager"]), async 
 });
 
 // GET /api/customers/:id/purchases - customer purchases [admin only]
-router.get("/:id/purchases", authMiddleware, roleCheck(["admin", "manager"]), async (req, res) => {
+router.get("/:id/purchases", authMiddleware, roleCheck(["admin"]), async (req, res) => {
   try {
     const purchases = await prisma.purchase.findMany({
       where: { customerId: req.params.id },

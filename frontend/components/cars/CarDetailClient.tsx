@@ -17,13 +17,22 @@ export default function CarDetailClient({ car, relatedCars }: CarDetailClientPro
   const [testDriveOpen, setTestDriveOpen] = useState(false);
   const [testDriveName, setTestDriveName] = useState("");
   const [testDrivePhone, setTestDrivePhone] = useState("");
+  const [testDriveEmail, setTestDriveEmail] = useState("");
   const [preferredDate, setPreferredDate] = useState("");
+  const [testDriveMessage, setTestDriveMessage] = useState("");
+  const [submittingTestDrive, setSubmittingTestDrive] = useState(false);
+  const [testDriveError, setTestDriveError] = useState<string | null>(null);
+  const [testDriveSuccess, setTestDriveSuccess] = useState<string | null>(null);
   const [depositPercent, setDepositPercent] = useState(20);
   const [annualInterestPercent, setAnnualInterestPercent] = useState(18);
   const [tenureMonths, setTenureMonths] = useState(36);
 
   const carLabel = `${car.year} ${car.make} ${car.model}`;
   const waNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "2348012345678";
+  const apiBase =
+    process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, "") ||
+    process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "") ||
+    "http://localhost:5000";
   const photos = car.photos?.length > 0 ? car.photos : ["", "", ""];
 
   const loanEstimate = useMemo(() => {
@@ -51,6 +60,51 @@ export default function CarDetailClient({ car, relatedCars }: CarDetailClientPro
       `Hi, I want to book a test drive for the ${carLabel}. My name is ${testDriveName || "[Your name]"}, phone ${testDrivePhone || "[Your phone]"}, preferred date: ${preferredDate || "[date]"}.`
     );
     window.open(`https://wa.me/${waNumber}?text=${text}`, "_blank", "noreferrer");
+  };
+
+  const submitTestDrive = async () => {
+    if (!testDriveName.trim() || !testDrivePhone.trim()) {
+      setTestDriveError("Name and phone number are required.");
+      return;
+    }
+
+    setSubmittingTestDrive(true);
+    setTestDriveError(null);
+    setTestDriveSuccess(null);
+
+    try {
+      const response = await fetch(`${apiBase}/api/test-drives`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: testDriveName.trim(),
+          phone: testDrivePhone.trim(),
+          email: testDriveEmail.trim() || undefined,
+          carId: car.id,
+          preferredDate: preferredDate || undefined,
+          message: testDriveMessage.trim() || undefined,
+        }),
+      });
+
+      if (!response.ok) {
+        const payload = (await response.json().catch(() => null)) as { error?: string } | null;
+        throw new Error(payload?.error || "Failed to submit booking request");
+      }
+
+      setTestDriveSuccess("Booking request received. Our team will contact you shortly.");
+      setTestDriveName("");
+      setTestDrivePhone("");
+      setTestDriveEmail("");
+      setPreferredDate("");
+      setTestDriveMessage("");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unable to submit booking request";
+      setTestDriveError(message);
+    } finally {
+      setSubmittingTestDrive(false);
+    }
   };
 
   return (
@@ -135,7 +189,11 @@ export default function CarDetailClient({ car, relatedCars }: CarDetailClientPro
           </a>
           <button
             type="button"
-            onClick={() => setTestDriveOpen(true)}
+            onClick={() => {
+              setTestDriveError(null);
+              setTestDriveSuccess(null);
+              setTestDriveOpen(true);
+            }}
             className="rounded-lg border border-black/15 px-5 py-3 font-semibold"
           >
             Book a Test Drive
@@ -237,18 +295,43 @@ export default function CarDetailClient({ car, relatedCars }: CarDetailClientPro
                 className="rounded-lg border border-black/15 px-3 py-2"
               />
               <input
+                type="email"
+                value={testDriveEmail}
+                onChange={(event) => setTestDriveEmail(event.target.value)}
+                placeholder="Email (optional)"
+                className="rounded-lg border border-black/15 px-3 py-2"
+              />
+              <input
                 type="date"
                 value={preferredDate}
                 onChange={(event) => setPreferredDate(event.target.value)}
                 title="Preferred date"
                 className="rounded-lg border border-black/15 px-3 py-2"
               />
+              <textarea
+                value={testDriveMessage}
+                onChange={(event) => setTestDriveMessage(event.target.value)}
+                placeholder="Any extra details (optional)"
+                rows={3}
+                className="rounded-lg border border-black/15 px-3 py-2"
+              />
+              {testDriveError ? <p className="text-sm text-red-700">{testDriveError}</p> : null}
+              {testDriveSuccess ? <p className="text-sm text-green-700">{testDriveSuccess}</p> : null}
+              <button
+                type="button"
+                onClick={submitTestDrive}
+                disabled={submittingTestDrive}
+                className="rounded-lg bg-brand px-4 py-2 font-semibold text-white disabled:opacity-70"
+              >
+                {submittingTestDrive ? "Submitting..." : "Submit Booking"}
+              </button>
+              <p className="text-center text-xs text-ink-muted">or</p>
               <button
                 type="button"
                 onClick={openWhatsAppForTestDrive}
-                className="rounded-lg bg-brand px-4 py-2 font-semibold text-white"
+                className="rounded-lg border border-black/15 px-4 py-2 font-semibold"
               >
-                Send Booking Request
+                Continue on WhatsApp
               </button>
             </div>
           </div>

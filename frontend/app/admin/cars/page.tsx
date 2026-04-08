@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, useCallback, useEffect, useState } from "react";
+import { FormEvent, Suspense, useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import AdminGate from "@/components/admin/AdminGate";
 import { formatNaira } from "@/lib/api";
@@ -60,6 +60,14 @@ const emptyForm: CarFormState = {
 };
 
 export default function AdminCarsPage() {
+  return (
+    <Suspense fallback={null}>
+      <AdminCarsPageContent />
+    </Suspense>
+  );
+}
+
+function AdminCarsPageContent() {
   const searchParams = useSearchParams();
   const [token, setToken] = useState("");
   const [cars, setCars] = useState<CarItem[]>([]);

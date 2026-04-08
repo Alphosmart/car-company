@@ -52,6 +52,9 @@ const notificationsRoutes = require("./routes/notifications");
 const analyticsRoutes = require("./routes/analytics");
 const staffRoutes = require("./routes/staff");
 const publicRoutes = require("./routes/public");
+const blogRoutes = require("./routes/blog");
+const testDrivesRoutes = require("./routes/testdrives");
+const companyRoutes = require("./routes/company");
 const { startScheduler } = require("./services/scheduler");
 
 // API routes
@@ -64,6 +67,9 @@ app.use("/api/referrals", referralsRoutes);
 app.use("/api/notifications", authMiddleware, roleCheck(["admin", "manager"]), notificationsRoutes);
 app.use("/api/analytics", authMiddleware, roleCheck(["admin", "manager"]), analyticsRoutes);
 app.use("/api/staff", staffRoutes);
+app.use("/api/blog", blogRoutes);
+app.use("/api/test-drives", testDrivesRoutes);
+app.use("/api/company", companyRoutes);
 
 startScheduler();
 

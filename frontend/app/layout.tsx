@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Sora, Space_Grotesk } from "next/font/google";
+import { Suspense } from "react";
 import "./globals.css";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -32,7 +33,9 @@ export default function RootLayout({
       className={`${sora.variable} ${spaceGrotesk.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-background text-foreground">
-        <ReferralTracker />
+        <Suspense fallback={null}>
+          <ReferralTracker />
+        </Suspense>
         <Navbar />
         <main className="flex-1">{children}</main>
         <Footer />

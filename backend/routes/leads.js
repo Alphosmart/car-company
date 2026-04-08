@@ -7,7 +7,7 @@ const { getDateFilterFromRangeToken } = require("../lib/dateFilters");
 const { sendSms } = require("../services/termii");
 
 // GET /api/leads - get all leads with filters [admin only]
-router.get("/", authMiddleware, roleCheck(["admin", "manager", "sales_rep"]), async (req, res) => {
+router.get("/", authMiddleware, roleCheck(["admin", "sales_rep"]), async (req, res) => {
   try {
     const { status, carId, staffId, dateRange, page = 1, limit = 20 } = req.query;
 
@@ -57,7 +57,7 @@ router.get("/", authMiddleware, roleCheck(["admin", "manager", "sales_rep"]), as
 });
 
 // GET /api/leads/:id - get single lead [admin only]
-router.get("/:id", authMiddleware, roleCheck(["admin", "manager", "sales_rep"]), async (req, res) => {
+router.get("/:id", authMiddleware, roleCheck(["admin", "sales_rep"]), async (req, res) => {
   try {
     const lead = await prisma.lead.findUnique({
       where: { id: req.params.id },
@@ -203,7 +203,7 @@ router.post("/", async (req, res) => {
 });
 
 // PATCH /api/leads/:id - update lead [admin only]
-router.patch("/:id", authMiddleware, roleCheck(["admin", "manager", "sales_rep"]), async (req, res) => {
+router.patch("/:id", authMiddleware, roleCheck(["admin", "sales_rep"]), async (req, res) => {
   try {
     const { id } = req.params;
     const updates = req.body;
@@ -247,7 +247,7 @@ router.patch("/:id", authMiddleware, roleCheck(["admin", "manager", "sales_rep"]
 });
 
 // POST /api/leads/:id/assign - assign lead to staff [admin only]
-router.post("/:id/assign", authMiddleware, roleCheck(["admin", "manager"]), async (req, res) => {
+router.post("/:id/assign", authMiddleware, roleCheck(["admin"]), async (req, res) => {
   try {
     const { id } = req.params;
     const { staffId } = req.body;
