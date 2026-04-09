@@ -9,6 +9,7 @@ type HeroSlide = {
   mediaType: "image" | "video";
   title: string;
   subtitle: string;
+  description?: string;
 };
 
 type CompanyPayload = {
@@ -81,7 +82,7 @@ export default function AdminHomeCarouselPage() {
     setSlides((current) => current.filter((item) => item.id !== id));
   }
 
-  function updateSlide(id: string, key: "title" | "subtitle", value: string) {
+  function updateSlide(id: string, key: "title" | "subtitle" | "description", value: string) {
     setSlides((current) =>
       current.map((item) => {
         if (item.id !== id) return item;
@@ -219,7 +220,9 @@ export default function AdminHomeCarouselPage() {
           {loading ? <p className="mt-4 text-sm text-ink-muted">Loading slides...</p> : null}
 
           {!loading && slides.length === 0 ? (
-            <p className="mt-4 text-sm text-ink-muted">No slides yet. Upload media to get started.</p>
+            <p className="mt-4 text-sm text-ink-muted">
+              No slides yet. Upload media to get started. Description fields appear on each slide after upload.
+            </p>
           ) : (
             <div className="mt-4 grid gap-4">
               {slides.map((slide, index) => (
@@ -253,6 +256,16 @@ export default function AdminHomeCarouselPage() {
                           onChange={(event) => updateSlide(slide.id, "subtitle", event.target.value)}
                           className="rounded-lg border border-black/15 px-3 py-2 font-normal"
                           placeholder="Optional slide subtitle"
+                        />
+                      </label>
+                      <label className="grid gap-1 text-sm font-semibold">
+                        Description
+                        <textarea
+                          value={slide.description || ""}
+                          onChange={(event) => updateSlide(slide.id, "description", event.target.value)}
+                          className="rounded-lg border border-black/15 px-3 py-2 font-normal"
+                          placeholder="Optional slide description"
+                          rows={3}
                         />
                       </label>
 

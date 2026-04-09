@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import LoanCalculatorClient from "@/components/tools/LoanCalculatorClient";
 import ValueEstimatorClient from "@/components/tools/ValueEstimatorClient";
 import HistoryCheckClient from "@/components/tools/HistoryCheckClient";
-import { formatNaira, getCarsPage } from "@/lib/api";
+import { formatNaira, getCarsPage, getCompanyProfile } from "@/lib/api";
 import { toolsPageContent } from "@/lib/navigation";
 
 type ToolsPageProps = {
@@ -204,9 +204,11 @@ export default async function ToolsPage({ params, searchParams }: ToolsPageProps
   }
 
   if (slug === "loan-calculator") {
+    const profile = await getCompanyProfile();
+
     return (
       <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6">
-        <LoanCalculatorClient />
+        <LoanCalculatorClient config={profile.settings.finance} />
       </div>
     );
   }

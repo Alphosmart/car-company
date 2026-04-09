@@ -1,7 +1,9 @@
 const express = require("express");
 const router = express.Router();
 const { randomUUID } = require("crypto");
+const fs = require("fs/promises");
 const multer = require("multer");
+const path = require("path");
 const authMiddleware = require("../middleware/auth");
 const roleCheck = require("../middleware/roleCheck");
 const prisma = require("../lib/prisma");
@@ -12,6 +14,163 @@ const upload = multer({
   limits: { fileSize: 50 * 1024 * 1024 },
 });
 
+function getDefaultCompanySettings() {
+  return {
+    finance: {
+      defaultPrice: 45000000,
+      defaultDownPayment: 9000000,
+      defaultMonths: 36,
+      defaultAnnualRate: 22,
+      disclaimer: "Use this to compare financing scenarios before you reach out to the sales team.",
+    },
+    contact: {
+      phone: "+234 801 234 5678",
+      email: "info@sarkinmotaautos.com",
+      address: "Plot 14, Auto Market Road, Abuja",
+      hours: "Mon-Sat, 9:00AM - 6:00PM",
+      whatsappNumber: "09133225255",
+      whatsappMessage: "Hi, I would like to ask about your available cars.",
+      mapEmbedUrl: "https://maps.google.com/maps?q=Abuja%20Nigeria&t=&z=13&ie=UTF8&iwloc=&output=embed",
+    },
+    homepage: {
+      trustCards: [
+        { label: "Years in Business", value: "8+" },
+        { label: "Cars Sold", value: "1,200+" },
+        { label: "Verified Listings", value: "100%" },
+        { label: "After-Sales Support", value: "Dedicated" },
+      ],
+      testimonials: [
+        {
+          name: "Mariam S.",
+          text: "The team gave me full service history before I paid. The process was transparent and fast.",
+        },
+        {
+          name: "Tunde A.",
+          text: "I got a clean Toyota in two days, and the after-sales support has been excellent.",
+        },
+        {
+          name: "Ngozi O.",
+          text: "They helped me compare options within my budget and arranged a smooth test drive.",
+        },
+      ],
+    },
+    social: {
+      x: "https://x.com/SarkinMota_AMF",
+      youtube: "https://www.youtube.com/@SarkinMota-24",
+      facebook: "https://www.facebook.com/profile.php?id=61586026326682",
+      tiktok: "https://www.tiktok.com/@alamin_sarkinmota",
+      instagram: "https://www.instagram.com/p/DWpTtVQjYUS/",
+    },
+  };
+}
+
+function normalizeCompanySettings(rawSettings) {
+  const defaults = getDefaultCompanySettings();
+
+  if (!rawSettings || typeof rawSettings !== "object") {
+    return defaults;
+  }
+
+  const source = rawSettings;
+  const financeSource = source.finance && typeof source.finance === "object" ? source.finance : {};
+  const contactSource = source.contact && typeof source.contact === "object" ? source.contact : {};
+  const homepageSource = source.homepage && typeof source.homepage === "object" ? source.homepage : {};
+  const socialSource = source.social && typeof source.social === "object" ? source.social : {};
+
+  const trustCards = Array.isArray(homepageSource.trustCards)
+    ? homepageSource.trustCards
+        .map((item) => {
+          if (!item || typeof item !== "object") return null;
+          const label = typeof item.label === "string" ? item.label.trim() : "";
+          const value = typeof item.value === "string" ? item.value.trim() : "";
+          if (!label || !value) return null;
+          return { label, value };
+        })
+        .filter(Boolean)
+    : defaults.homepage.trustCards;
+
+  const testimonials = Array.isArray(homepageSource.testimonials)
+    ? homepageSource.testimonials
+        .map((item) => {
+          if (!item || typeof item !== "object") return null;
+          const name = typeof item.name === "string" ? item.name.trim() : "";
+          const text = typeof item.text === "string" ? item.text.trim() : "";
+          if (!name || !text) return null;
+          return { name, text };
+        })
+        .filter(Boolean)
+    : defaults.homepage.testimonials;
+
+  return {
+    finance: {
+      defaultPrice: Number(financeSource.defaultPrice ?? defaults.finance.defaultPrice),
+      defaultDownPayment: Number(financeSource.defaultDownPayment ?? defaults.finance.defaultDownPayment),
+      defaultMonths: Number(financeSource.defaultMonths ?? defaults.finance.defaultMonths),
+      defaultAnnualRate: Number(financeSource.defaultAnnualRate ?? defaults.finance.defaultAnnualRate),
+      disclaimer:
+        typeof financeSource.disclaimer === "string" && financeSource.disclaimer.trim()
+          ? financeSource.disclaimer.trim()
+          : defaults.finance.disclaimer,
+    },
+    contact: {
+      phone:
+        typeof contactSource.phone === "string" && contactSource.phone.trim()
+          ? contactSource.phone.trim()
+          : defaults.contact.phone,
+      email:
+        typeof contactSource.email === "string" && contactSource.email.trim()
+          ? contactSource.email.trim()
+          : defaults.contact.email,
+      address:
+        typeof contactSource.address === "string" && contactSource.address.trim()
+          ? contactSource.address.trim()
+          : defaults.contact.address,
+      hours:
+        typeof contactSource.hours === "string" && contactSource.hours.trim()
+          ? contactSource.hours.trim()
+          : defaults.contact.hours,
+      whatsappNumber:
+        typeof contactSource.whatsappNumber === "string" && contactSource.whatsappNumber.trim()
+          ? contactSource.whatsappNumber.trim()
+          : defaults.contact.whatsappNumber,
+      whatsappMessage:
+        typeof contactSource.whatsappMessage === "string" && contactSource.whatsappMessage.trim()
+          ? contactSource.whatsappMessage.trim()
+          : defaults.contact.whatsappMessage,
+      mapEmbedUrl:
+        typeof contactSource.mapEmbedUrl === "string" && contactSource.mapEmbedUrl.trim()
+          ? contactSource.mapEmbedUrl.trim()
+          : defaults.contact.mapEmbedUrl,
+    },
+    homepage: {
+      trustCards,
+      testimonials,
+    },
+    social: {
+      x:
+        typeof socialSource.x === "string" && socialSource.x.trim()
+          ? socialSource.x.trim()
+          : defaults.social.x,
+      youtube:
+        typeof socialSource.youtube === "string" && socialSource.youtube.trim()
+          ? socialSource.youtube.trim()
+          : defaults.social.youtube,
+      facebook:
+        typeof socialSource.facebook === "string" && socialSource.facebook.trim()
+          ? socialSource.facebook.trim()
+          : defaults.social.facebook,
+      tiktok:
+        typeof socialSource.tiktok === "string" && socialSource.tiktok.trim()
+          ? socialSource.tiktok.trim()
+          : defaults.social.tiktok,
+      instagram:
+        typeof socialSource.instagram === "string" && socialSource.instagram.trim()
+          ? socialSource.instagram.trim()
+          : defaults.social.instagram,
+    },
+  };
+}
+
 async function ensureCompanyProfileStorage() {
   await prisma.$executeRawUnsafe(`
     CREATE TABLE IF NOT EXISTS "CompanyProfile" (
@@ -21,6 +180,7 @@ async function ensureCompanyProfileStorage() {
       "happyCustomers" INTEGER NOT NULL,
       "citiesServed" INTEGER NOT NULL,
       "team" JSONB[] NOT NULL DEFAULT ARRAY[]::JSONB[],
+      "settings" JSONB NOT NULL DEFAULT '{}'::JSONB,
       "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
       CONSTRAINT "CompanyProfile_pkey" PRIMARY KEY ("id")
     )
@@ -28,6 +188,10 @@ async function ensureCompanyProfileStorage() {
 
   await prisma.$executeRawUnsafe(
     "ALTER TABLE \"CompanyProfile\" ADD COLUMN IF NOT EXISTS \"heroSlides\" JSONB NOT NULL DEFAULT '[]'::JSONB"
+  );
+
+  await prisma.$executeRawUnsafe(
+    "ALTER TABLE \"CompanyProfile\" ADD COLUMN IF NOT EXISTS \"settings\" JSONB NOT NULL DEFAULT '{}'::JSONB"
   );
 }
 
@@ -42,6 +206,7 @@ async function getLatestCompanyProfileRow() {
       "happyCustomers",
       "citiesServed",
       "team",
+      "settings",
       "heroSlides",
       "updatedAt"
     FROM "CompanyProfile"
@@ -61,9 +226,9 @@ async function ensureCompanyProfileRecord() {
 
   await prisma.$executeRawUnsafe(`
     INSERT INTO "CompanyProfile"
-      ("id", "yearsInBusiness", "carsSold", "happyCustomers", "citiesServed", "team", "heroSlides", "updatedAt")
+      ("id", "yearsInBusiness", "carsSold", "happyCustomers", "citiesServed", "team", "settings", "heroSlides", "updatedAt")
     VALUES
-      ('${id}', 8, 1200, 900, 12, ARRAY[]::JSONB[], '[]'::JSONB, CURRENT_TIMESTAMP)
+      ('${id}', 8, 1200, 900, 12, ARRAY[]::JSONB[], '${JSON.stringify(getDefaultCompanySettings())}'::JSONB, '[]'::JSONB, CURRENT_TIMESTAMP)
   `);
 
   row = await getLatestCompanyProfileRow();
@@ -83,6 +248,7 @@ function normalizeHeroSlides(rawSlides) {
       const mediaType = item.mediaType === "video" ? "video" : "image";
       const title = typeof item.title === "string" ? item.title : "";
       const subtitle = typeof item.subtitle === "string" ? item.subtitle : "";
+      const description = typeof item.description === "string" ? item.description : "";
 
       if (!url) return null;
 
@@ -92,9 +258,54 @@ function normalizeHeroSlides(rawSlides) {
         mediaType,
         title,
         subtitle,
+        ...(description && { description }),
       };
     })
     .filter(Boolean);
+}
+
+function normalizeHomeSlides(rawSlides) {
+  return normalizeHeroSlides(rawSlides);
+}
+
+function resolveMediaExtension(file) {
+  const fromName = path.extname(file.originalname || "").toLowerCase();
+  if (fromName && /^[.][a-z0-9]+$/i.test(fromName)) {
+    return fromName;
+  }
+
+  if (typeof file.mimetype === "string") {
+    const mime = file.mimetype.toLowerCase();
+    if (mime === "image/jpeg") return ".jpg";
+    if (mime === "image/png") return ".png";
+    if (mime === "image/webp") return ".webp";
+    if (mime === "image/gif") return ".gif";
+    if (mime === "image/svg+xml") return ".svg";
+    if (mime === "video/mp4") return ".mp4";
+    if (mime === "video/webm") return ".webm";
+    if (mime === "video/quicktime") return ".mov";
+  }
+
+  return ".bin";
+}
+
+async function saveHeroMediaLocally(file, req) {
+  const uploadsDir = path.resolve(__dirname, "../uploads/home-carousel");
+  await fs.mkdir(uploadsDir, { recursive: true });
+
+  const filename = `${randomUUID()}${resolveMediaExtension(file)}`;
+  const fullPath = path.join(uploadsDir, filename);
+  await fs.writeFile(fullPath, file.buffer);
+
+  const baseUrl = `${req.protocol}://${req.get("host")}`;
+  const mediaType = typeof file.mimetype === "string" && file.mimetype.startsWith("video/")
+    ? "video"
+    : "image";
+
+  return {
+    secure_url: `${baseUrl}/uploads/home-carousel/${filename}`,
+    resource_type: mediaType,
+  };
 }
 
 async function persistHeroSlides(profileId, slides) {
@@ -175,6 +386,7 @@ router.get("/", async (req, res) => {
         citiesServed: 12,
         team: [],
         heroSlides: [],
+        settings: getDefaultCompanySettings(),
       });
     }
 
@@ -186,6 +398,7 @@ router.get("/", async (req, res) => {
       citiesServed: Number(profile.citiesServed ?? 12),
       team: Array.isArray(profile.team) ? profile.team : [],
       heroSlides: normalizeHeroSlides(profile.heroSlides),
+      settings: normalizeCompanySettings(profile.settings),
       updatedAt: profile.updatedAt,
     });
   } catch (error) {
@@ -232,6 +445,37 @@ router.patch("/admin", authMiddleware, roleCheck(["admin"]), async (req, res) =>
   }
 });
 
+// PATCH /api/company/admin/settings - update company settings [admin only]
+router.patch("/admin/settings", authMiddleware, roleCheck(["admin"]), async (req, res) => {
+  try {
+    const { settings } = req.body;
+
+    const profile = await ensureCompanyProfileRecord();
+
+    if (!profile) {
+      return res.status(500).json({ error: "Failed to initialize company profile" });
+    }
+
+    const normalizedSettings = normalizeCompanySettings(settings);
+
+    await prisma.$executeRaw`
+      UPDATE "CompanyProfile"
+      SET "settings" = CAST(${JSON.stringify(normalizedSettings)} AS JSONB)
+      WHERE "id" = ${profile.id}
+    `;
+
+    const updatedProfile = await getLatestCompanyProfileRow();
+
+    res.json({
+      ...updatedProfile,
+      settings: normalizeCompanySettings(updatedProfile?.settings),
+    });
+  } catch (error) {
+    console.error("Update company settings error:", error);
+    res.status(500).json({ error: "Failed to update company settings" });
+  }
+});
+
 // POST /api/company/admin/hero-slides - upload image/video slides [admin only]
 router.post(
   "/admin/hero-slides",
@@ -252,10 +496,17 @@ router.post(
 
       const uploadedSlides = await Promise.all(
         req.files.map(async (file) => {
-          const result = await uploadMediaBuffer(file.buffer, {
-            folder: "car-company/home-carousel",
-            resourceType: "auto",
-          });
+          let result;
+
+          try {
+            result = await uploadMediaBuffer(file.buffer, {
+              folder: "car-company/home-carousel",
+              resourceType: "auto",
+            });
+          } catch (uploadError) {
+            console.warn("Cloud upload failed for hero slide; using local fallback:", uploadError?.message || uploadError);
+            result = await saveHeroMediaLocally(file, req);
+          }
 
           const mediaType = result.resource_type === "video" ? "video" : "image";
 
@@ -277,7 +528,7 @@ router.post(
       res.json({ heroSlides: savedSlides });
     } catch (error) {
       console.error("Upload hero slides error:", error);
-      res.status(500).json({ error: "Failed to upload hero slides" });
+      res.status(500).json({ error: error?.message || "Failed to upload hero slides" });
     }
   }
 );

@@ -3,6 +3,18 @@
 import { useMemo, useState } from "react";
 import { calculateMonthlyPayment } from "@/lib/loanCalculator.mjs";
 
+type LoanCalculatorConfig = {
+  defaultPrice: number;
+  defaultDownPayment: number;
+  defaultMonths: number;
+  defaultAnnualRate: number;
+  disclaimer: string;
+};
+
+type LoanCalculatorClientProps = {
+  config?: LoanCalculatorConfig;
+};
+
 function formatCurrency(value: number): string {
   return new Intl.NumberFormat("en-NG", {
     style: "currency",
@@ -11,11 +23,20 @@ function formatCurrency(value: number): string {
   }).format(value);
 }
 
-export default function LoanCalculatorClient() {
-  const [price, setPrice] = useState("45000000");
-  const [downPayment, setDownPayment] = useState("9000000");
-  const [months, setMonths] = useState("36");
-  const [annualRate, setAnnualRate] = useState("22");
+const fallbackConfig: LoanCalculatorConfig = {
+  defaultPrice: 45000000,
+  defaultDownPayment: 9000000,
+  defaultMonths: 36,
+  defaultAnnualRate: 22,
+  disclaimer: "Use this to compare financing scenarios before you reach out to the sales team.",
+};
+
+export default function LoanCalculatorClient({ config }: LoanCalculatorClientProps) {
+  const activeConfig = config || fallbackConfig;
+  const [price, setPrice] = useState(String(activeConfig.defaultPrice));
+  const [downPayment, setDownPayment] = useState(String(activeConfig.defaultDownPayment));
+  const [months, setMonths] = useState(String(activeConfig.defaultMonths));
+  const [annualRate, setAnnualRate] = useState(String(activeConfig.defaultAnnualRate));
 
   const principal = Math.max(Number(price || 0) - Number(downPayment || 0), 0);
   const monthly = calculateMonthlyPayment(principal, Number(annualRate || 0), Number(months || 0));
@@ -90,7 +111,7 @@ export default function LoanCalculatorClient() {
         </div>
 
         <p className="rounded-xl border border-brand/20 bg-brand-soft/30 p-4 text-sm text-foreground">
-          Use this to compare financing scenarios before you reach out to the sales team.
+          {activeConfig.disclaimer}
         </p>
       </form>
 

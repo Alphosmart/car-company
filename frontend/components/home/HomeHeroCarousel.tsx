@@ -21,6 +21,7 @@ export default function HomeHeroCarousel({ slides }: HomeHeroCarouselProps) {
         mediaType: "video" as const,
         title: "Sarkin Mota Autos Showcase",
         subtitle: "Premium rides. Trusted process. Fast delivery.",
+        description: "Meet Dr. Aliyu Muhammed of Sarkin Mota Autos\nAn award-winning automobile brand redefining the driving experience.",
       },
     ];
   }, [slides]);
@@ -52,6 +53,7 @@ export default function HomeHeroCarousel({ slides }: HomeHeroCarouselProps) {
   const heroTitle = active.title || "Find your next ride with confidence";
   const heroSubtitle =
     active.subtitle || "Verified inventory, transparent pricing, and support that stays with you.";
+  const heroDescription = active.description || "";
 
   return (
     <section className="relative left-1/2 right-1/2 w-screen -translate-x-1/2 overflow-hidden bg-black">
@@ -88,6 +90,11 @@ export default function HomeHeroCarousel({ slides }: HomeHeroCarouselProps) {
               {heroTitle}
             </h1>
             <p className="mt-4 max-w-2xl text-base text-white/85 sm:text-3xl">{heroSubtitle}</p>
+            {heroDescription && (
+              <p className="mt-6 max-w-2xl whitespace-pre-line text-base text-white/75 sm:text-lg">
+                {heroDescription}
+              </p>
+            )}
             <div className="mt-8 flex flex-wrap items-center gap-3">
               <Link
                 href="/cars"

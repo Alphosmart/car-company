@@ -1,25 +1,15 @@
 import Link from "next/link";
 import HomeHeroCarousel from "@/components/home/HomeHeroCarousel";
-import { formatNaira, getCars, getHomeCarouselSlides, getPromoBanner } from "@/lib/api";
+import { formatNaira, getCars, getCompanyProfile, getPromoBanner } from "@/lib/api";
 
 export default async function Home() {
   const featuredCars = await getCars({ featured: "true", limit: "6" });
+  const profile = await getCompanyProfile();
   const promo = await getPromoBanner();
-  const heroSlides = await getHomeCarouselSlides();
-  const testimonials = [
-    {
-      name: "Mariam S.",
-      text: "The team gave me full service history before I paid. The process was transparent and fast.",
-    },
-    {
-      name: "Tunde A.",
-      text: "I got a clean Toyota in two days, and the after-sales support has been excellent.",
-    },
-    {
-      name: "Ngozi O.",
-      text: "They helped me compare options within my budget and arranged a smooth test drive.",
-    },
-  ];
+  const heroSlides = profile.heroSlides;
+  const trustCards = profile.settings.homepage.trustCards;
+  const testimonials = profile.settings.homepage.testimonials;
+  const contactSettings = profile.settings.contact;
 
   return (
     <>
@@ -64,10 +54,9 @@ export default async function Home() {
         </section>
 
         <section className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <TrustCard label="Years in Business" value="8+" />
-          <TrustCard label="Cars Sold" value="1,200+" />
-          <TrustCard label="Verified Listings" value="100%" />
-          <TrustCard label="After-Sales Support" value="Dedicated" />
+          {trustCards.map((card) => (
+            <TrustCard key={card.label} label={card.label} value={card.value} />
+          ))}
         </section>
 
       <section className="mt-10">
@@ -123,7 +112,7 @@ export default async function Home() {
             Tell us your budget, preferred make, and model. Our team will source available options for you.
           </p>
           <a
-            href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "2348012345678"}?text=${encodeURIComponent("Hi Sarkin Mota Autos, I am looking for a specific car. Please help me source one.")}`}
+            href={`https://wa.me/${contactSettings.whatsappNumber}?text=${encodeURIComponent(contactSettings.whatsappMessage)}`}
             target="_blank"
             rel="noreferrer"
             className="mt-4 inline-block rounded-lg bg-brand px-5 py-3 font-semibold text-white"

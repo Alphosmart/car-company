@@ -1,6 +1,7 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
+import { defaultCompanySettings } from "@/lib/api";
 
 const apiBase =
   process.env.NEXT_PUBLIC_API_BASE_URL ||
@@ -11,6 +12,25 @@ export default function ContactPage() {
   const [sent, setSent] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [contactSettings, setContactSettings] = useState(defaultCompanySettings.contact);
+
+  useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        const response = await fetch(`${apiBase}/api/company`, { cache: "no-store" });
+        if (!response.ok) return;
+
+        const payload = (await response.json()) as { settings?: { contact?: typeof defaultCompanySettings.contact } };
+        if (payload.settings?.contact) {
+          setContactSettings({ ...defaultCompanySettings.contact, ...payload.settings.contact });
+        }
+      } catch {
+        // fall back to defaults
+      }
+    };
+
+    void loadSettings();
+  }, []);
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -51,7 +71,7 @@ export default function ContactPage() {
       <div className="grid gap-6 lg:grid-cols-[1.2fr_1fr]">
         <section className="rounded-3xl border border-black/10 bg-surface p-6 sm:p-8">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-ink-muted">Contact</p>
-          <h1 className="mt-3 font-[family-name:var(--font-sora)] text-3xl font-bold sm:text-4xl">
+          <h1 className="mt-3 font-(family-name:--font-sora) text-3xl font-bold sm:text-4xl">
             Let us help you find the right car
           </h1>
           <form onSubmit={submit} className="mt-6 grid gap-3">
@@ -69,13 +89,13 @@ export default function ContactPage() {
         <section className="rounded-3xl border border-black/10 bg-surface p-6 sm:p-8">
           <h2 className="text-xl font-semibold">Visit or Call</h2>
           <div className="mt-4 grid gap-3 text-sm">
-            <p><span className="font-semibold">Phone:</span> +234 801 234 5678</p>
-            <p><span className="font-semibold">Email:</span> info@sarkinmotaautos.com</p>
-            <p><span className="font-semibold">Address:</span> Plot 14, Auto Market Road, Abuja</p>
-            <p><span className="font-semibold">Hours:</span> Mon-Sat, 9:00AM - 6:00PM</p>
+            <p><span className="font-semibold">Phone:</span> {contactSettings.phone}</p>
+            <p><span className="font-semibold">Email:</span> {contactSettings.email}</p>
+            <p><span className="font-semibold">Address:</span> {contactSettings.address}</p>
+            <p><span className="font-semibold">Hours:</span> {contactSettings.hours}</p>
           </div>
           <a
-            href="https://wa.me/2348012345678?text=Hi%20Sarkin%20Mota%20Autos%2C%20I%20need%20help%20finding%20a%20car"
+            href={`https://wa.me/${contactSettings.whatsappNumber}?text=${encodeURIComponent(contactSettings.whatsappMessage)}`}
             target="_blank"
             rel="noreferrer"
             className="mt-5 inline-block rounded-lg border border-black/15 px-4 py-2 font-semibold"
@@ -86,8 +106,8 @@ export default function ContactPage() {
           <div className="mt-5 overflow-hidden rounded-2xl border border-black/10">
             <iframe
               title="Sarkin Mota Autos contact map"
-              src="https://maps.google.com/maps?q=Abuja%20Nigeria&t=&z=13&ie=UTF8&iwloc=&output=embed"
-              className="h-[250px] w-full"
+              src={contactSettings.mapEmbedUrl}
+              className="h-62.5 w-full"
               loading="lazy"
             />
           </div>

@@ -154,7 +154,7 @@ export default function Navbar() {
                   setMobileOpenMenuId(null);
                 }}
               >
-                Admin
+                Dashboard
               </Link>
               <span className="rounded-lg border border-white/15 px-3 py-2 text-xs text-white/90">
                 {staff.name}
@@ -283,7 +283,7 @@ export default function Navbar() {
                         setMobileOpenMenuId(null);
                       }}
                     >
-                      Admin
+                      Dashboard
                     </Link>
                     <span className="rounded-lg border border-white/10 px-3 py-2 text-xs text-white/80">
                       Logged in as {staff.name}

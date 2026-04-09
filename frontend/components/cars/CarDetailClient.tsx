@@ -28,7 +28,7 @@ export default function CarDetailClient({ car, relatedCars }: CarDetailClientPro
   const [tenureMonths, setTenureMonths] = useState(36);
 
   const carLabel = `${car.year} ${car.make} ${car.model}`;
-  const waNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "2348012345678";
+  const waNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "09133225255";
   const apiBase =
     process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, "") ||
     process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "") ||

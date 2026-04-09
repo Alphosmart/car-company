@@ -2,6 +2,7 @@ import { getCompanyProfile } from "@/lib/api";
 
 export default async function AboutPage() {
   const profile = await getCompanyProfile();
+  const settings = profile.settings;
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6">
@@ -35,14 +36,21 @@ export default async function AboutPage() {
         )}
       </section>
 
-      <section className="mt-8 rounded-3xl border border-black/10 bg-surface p-6">
-        <h2 className="text-xl font-semibold">Showroom Location</h2>
-        <p className="mt-2 text-sm text-ink-muted">Plot 14, Auto Market Road, Abuja, Nigeria</p>
-        <div className="mt-4 overflow-hidden rounded-2xl border border-black/10">
+      <section className="mt-8 grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
+        <div className="rounded-3xl border border-black/10 bg-surface p-6">
+          <h2 className="text-xl font-semibold">Showroom Location</h2>
+          <p className="mt-2 text-sm text-ink-muted">{settings.contact.address}, Nigeria</p>
+          <div className="mt-4 grid gap-3 text-sm text-ink-muted">
+            <p><span className="font-semibold text-foreground">Phone:</span> {settings.contact.phone}</p>
+            <p><span className="font-semibold text-foreground">Email:</span> {settings.contact.email}</p>
+            <p><span className="font-semibold text-foreground">Hours:</span> {settings.contact.hours}</p>
+          </div>
+        </div>
+        <div className="overflow-hidden rounded-3xl border border-black/10 bg-surface">
           <iframe
             title="Sarkin Mota Autos showroom map"
-            src="https://maps.google.com/maps?q=Abuja%20Nigeria&t=&z=13&ie=UTF8&iwloc=&output=embed"
-            className="h-85 w-full"
+            src={settings.contact.mapEmbedUrl}
+            className="h-80 w-full"
             loading="lazy"
           />
         </div>
