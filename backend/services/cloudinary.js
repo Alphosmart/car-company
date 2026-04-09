@@ -32,7 +32,36 @@ async function uploadBuffer(buffer, folder = "car-company") {
   });
 }
 
+async function uploadMediaBuffer(buffer, options = {}) {
+  if (!CLOUDINARY_CLOUD_NAME || !CLOUDINARY_API_KEY || !CLOUDINARY_API_SECRET) {
+    throw new Error("Cloudinary is not configured");
+  }
+
+  const {
+    folder = "car-company/home-carousel",
+    resourceType = "auto",
+  } = options;
+
+  return new Promise((resolve, reject) => {
+    const uploadStream = cloudinary.uploader.upload_stream(
+      {
+        folder,
+        resource_type: resourceType,
+        quality: "auto",
+        fetch_format: "auto",
+      },
+      (error, result) => {
+        if (error) return reject(error);
+        resolve(result);
+      }
+    );
+
+    uploadStream.end(buffer);
+  });
+}
+
 module.exports = {
   cloudinary,
   uploadBuffer,
+  uploadMediaBuffer,
 };

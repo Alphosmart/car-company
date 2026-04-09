@@ -142,6 +142,15 @@ export type CompanyProfile = {
   happyCustomers: number;
   citiesServed: number;
   team: CompanyTeamMember[];
+  heroSlides: HomeCarouselSlide[];
+};
+
+export type HomeCarouselSlide = {
+  id: string;
+  url: string;
+  mediaType: "image" | "video";
+  title: string;
+  subtitle: string;
 };
 
 export async function getPromoBanner(): Promise<PromoBanner> {
@@ -177,10 +186,35 @@ export async function getCompanyProfile(): Promise<CompanyProfile> {
         happyCustomers: 900,
         citiesServed: 12,
         team: [],
+        heroSlides: [],
       };
     }
 
     const payload = (await response.json()) as Partial<CompanyProfile>;
+
+    const heroSlides = Array.isArray(payload.heroSlides)
+      ? payload.heroSlides
+          .map((item) => {
+            if (!item || typeof item !== "object") return null;
+
+            const id = typeof item.id === "string" ? item.id : "";
+            const url = typeof item.url === "string" ? item.url : "";
+            const mediaType = item.mediaType === "video" ? "video" : "image";
+            const title = typeof item.title === "string" ? item.title : "";
+            const subtitle = typeof item.subtitle === "string" ? item.subtitle : "";
+
+            if (!id || !url) return null;
+
+            return {
+              id,
+              url,
+              mediaType,
+              title,
+              subtitle,
+            } as HomeCarouselSlide;
+          })
+          .filter((slide): slide is HomeCarouselSlide => slide !== null)
+      : [];
 
     return {
       yearsInBusiness: Number(payload.yearsInBusiness ?? 8),
@@ -197,6 +231,7 @@ export async function getCompanyProfile(): Promise<CompanyProfile> {
             );
           })
         : [],
+      heroSlides,
     };
   } catch {
     return {
@@ -205,6 +240,12 @@ export async function getCompanyProfile(): Promise<CompanyProfile> {
       happyCustomers: 900,
       citiesServed: 12,
       team: [],
+      heroSlides: [],
     };
   }
+}
+
+export async function getHomeCarouselSlides(): Promise<HomeCarouselSlide[]> {
+  const profile = await getCompanyProfile();
+  return profile.heroSlides;
 }

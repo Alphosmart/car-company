@@ -12,6 +12,7 @@ const adminLinks = [
   { href: "/admin/marketing", label: "Marketing" },
   { href: "/admin/requests", label: "Requests" },
   { href: "/admin/company", label: "Company" },
+  { href: "/admin/home-carousel", label: "Home Carousel" },
   { href: "/admin/staff", label: "Staff" },
 ];
 

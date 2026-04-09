@@ -138,5 +138,6 @@ model CompanyProfile {
   happyCustomers Int
   citiesServed   Int
   team          Json[]
+  heroSlides    Json     @default("[]")
   updatedAt     DateTime @updatedAt
 }

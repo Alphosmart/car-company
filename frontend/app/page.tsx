@@ -1,9 +1,11 @@
 import Link from "next/link";
-import { formatNaira, getCars, getPromoBanner } from "@/lib/api";
+import HomeHeroCarousel from "@/components/home/HomeHeroCarousel";
+import { formatNaira, getCars, getHomeCarouselSlides, getPromoBanner } from "@/lib/api";
 
 export default async function Home() {
   const featuredCars = await getCars({ featured: "true", limit: "6" });
   const promo = await getPromoBanner();
+  const heroSlides = await getHomeCarouselSlides();
   const testimonials = [
     {
       name: "Mariam S.",
@@ -28,53 +30,59 @@ export default async function Home() {
       ) : null}
 
       <section className="rounded-3xl bg-surface p-7 shadow-sm sm:p-10">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-ink-muted">
-          Trusted auto dealer in Abuja
-        </p>
-        <h1 className="mt-3 max-w-3xl font-(family-name:--font-sora) text-3xl font-bold leading-tight sm:text-5xl">
-          Buy your next car with confidence, transparent pricing, and local support.
-        </h1>
-        <p className="mt-4 max-w-2xl text-ink-muted">
-          Browse verified inventory, ask questions instantly, and book a test drive without
-          stress.
-        </p>
-        <form action="/cars" className="mt-6 grid gap-2 rounded-2xl border border-black/10 bg-white p-3 sm:grid-cols-4">
-          <input
-            name="make"
-            placeholder="Make"
-            className="rounded-lg border border-black/15 px-3 py-2"
-          />
-          <select name="condition" className="rounded-lg border border-black/15 px-3 py-2" title="Condition">
-            <option value="">Any condition</option>
-            <option value="new">New</option>
-            <option value="used">Used</option>
-          </select>
-          <input
-            name="maxPrice"
-            type="number"
-            min={0}
-            placeholder="Max budget (NGN)"
-            className="rounded-lg border border-black/15 px-3 py-2"
-          />
-          <button className="rounded-lg bg-brand px-4 py-2 font-semibold text-white">
-            Search Cars
-          </button>
-        </form>
-        <div className="mt-7 flex flex-wrap gap-3">
-          <Link
-            href="/cars"
-            className="rounded-lg bg-brand px-5 py-3 font-semibold text-white"
-          >
-            Browse Inventory
-          </Link>
-          <a
-            href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "2348012345678"}`}
-            target="_blank"
-            rel="noreferrer"
-            className="rounded-lg border border-black/15 px-5 py-3 font-semibold"
-          >
-            Chat on WhatsApp
-          </a>
+        <div className="grid gap-8 lg:grid-cols-[1fr_0.95fr] lg:items-start">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-ink-muted">
+              Trusted auto dealer in Abuja
+            </p>
+            <h1 className="mt-3 max-w-3xl font-(family-name:--font-sora) text-3xl font-bold leading-tight sm:text-5xl">
+              Buy your next car with confidence, transparent pricing, and local support.
+            </h1>
+            <p className="mt-4 max-w-2xl text-ink-muted">
+              Browse verified inventory, ask questions instantly, and book a test drive without
+              stress.
+            </p>
+            <form action="/cars" className="mt-6 grid gap-2 rounded-2xl border border-black/10 bg-white p-3 sm:grid-cols-4">
+              <input
+                name="make"
+                placeholder="Make"
+                className="rounded-lg border border-black/15 px-3 py-2"
+              />
+              <select name="condition" className="rounded-lg border border-black/15 px-3 py-2" title="Condition">
+                <option value="">Any condition</option>
+                <option value="new">New</option>
+                <option value="used">Used</option>
+              </select>
+              <input
+                name="maxPrice"
+                type="number"
+                min={0}
+                placeholder="Max budget (NGN)"
+                className="rounded-lg border border-black/15 px-3 py-2"
+              />
+              <button className="rounded-lg bg-brand px-4 py-2 font-semibold text-white">
+                Search Cars
+              </button>
+            </form>
+            <div className="mt-7 flex flex-wrap gap-3">
+              <Link
+                href="/cars"
+                className="rounded-lg bg-brand px-5 py-3 font-semibold text-white"
+              >
+                Browse Inventory
+              </Link>
+              <a
+                href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "2348012345678"}`}
+                target="_blank"
+                rel="noreferrer"
+                className="rounded-lg border border-black/15 px-5 py-3 font-semibold"
+              >
+                Chat on WhatsApp
+              </a>
+            </div>
+          </div>
+
+          <HomeHeroCarousel slides={heroSlides} />
         </div>
       </section>
 
