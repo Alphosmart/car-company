@@ -174,7 +174,7 @@ export default function AdminCompanyPage() {
                 onChange={(event) => setTeamText(event.target.value)}
                 rows={8}
                 className="rounded-lg border border-black/15 px-3 py-2 font-normal"
-                placeholder="Ibrahim Musa|Founder\nAisha Bello|Sales Manager"
+                placeholder="Dr. Aliyu Uhammed|Founder and CEO\nAisha Bello|Sales Manager"
               />
             </label>
 

@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { megaMenuGroups, singleNavLinks } from "@/lib/navigation";
 
@@ -12,10 +13,28 @@ type StaffProfile = {
   role: string;
 };
 
+function ChevronIcon({ open }: { open: boolean }) {
+  return (
+    <svg
+      viewBox="0 0 12 12"
+      aria-hidden="true"
+      className={`h-3 w-3 transition-transform duration-200 ${open ? "rotate-180" : "rotate-0"}`}
+    >
+      <path
+        d="M3 4.5L6 7.5L9 4.5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 const publicLinks = [
   { href: "/", label: "Home" },
   { href: "/cars", label: "Inventory" },
-  { href: "/blog", label: "Blog" },
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },
 ];
@@ -36,14 +55,21 @@ function readStoredStaff(): StaffProfile | null {
 }
 
 export default function Navbar() {
+  const pathname = usePathname();
   const [staff, setStaff] = useState<StaffProfile | null>(null);
   const [openMenuId, setOpenMenuId] = useState<(typeof megaMenuGroups)[number]["id"] | null>(
     null,
   );
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const [mobileOpenMenuId, setMobileOpenMenuId] = useState<
     (typeof megaMenuGroups)[number]["id"] | null
   >(null);
+  const isHomePage = pathname === "/";
+  const overlayMode = isHomePage && !scrolled;
+  const sellSwapGroup = megaMenuGroups.find((group) => group.id === "sell-swap") ?? null;
+  const leftDesktopGroups = megaMenuGroups.filter((group) => group.id !== "sell-swap");
+  const overlaySingleNavLinks = singleNavLinks.filter((link) => link.href !== "/blog");
 
   const openMenu = useMemo(
     () => megaMenuGroups.find((group) => group.id === openMenuId) ?? null,
@@ -62,6 +88,21 @@ export default function Navbar() {
     };
   }, []);
 
+  useEffect(() => {
+    if (!isHomePage) {
+      setScrolled(false);
+      return;
+    }
+
+    const onScroll = () => setScrolled(window.scrollY > 96);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+    };
+  }, [isHomePage]);
+
   const logout = () => {
     window.localStorage.removeItem("token");
     window.localStorage.removeItem("authToken");
@@ -73,7 +114,11 @@ export default function Navbar() {
 
   return (
     <header
-      className="sticky top-0 z-50 border-b border-white/10 bg-black/60 text-white backdrop-blur-xl"
+      className={`sticky top-0 z-50 border-b text-white transition-colors duration-300 ${
+        overlayMode
+          ? "border-white/10 bg-black/25 backdrop-blur-[2px]"
+          : "border-white/10 bg-black/60 backdrop-blur-xl"
+      }`}
       onMouseLeave={() => setOpenMenuId(null)}
       onKeyDown={(event) => {
         if (event.key === "Escape") {
@@ -83,22 +128,26 @@ export default function Navbar() {
         }
       }}
     >
-      <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
+      <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-4 py-2.5 sm:px-6">
         <Link
           href="/"
-          className="flex items-center text-base font-bold tracking-tight text-white sm:text-lg"
-            onClick={() => {
-              setOpenMenuId(null);
-              setMobileOpen(false);
-              setMobileOpenMenuId(null);
-            }}
+          className={`flex items-center text-base font-bold tracking-tight text-white sm:text-lg ${
+            overlayMode
+              ? "lg:hidden"
+              : ""
+          }`}
+          onClick={() => {
+            setOpenMenuId(null);
+            setMobileOpen(false);
+            setMobileOpenMenuId(null);
+          }}
         >
           <Image
             src="/assets/imgi_1_brand-logo-light.webp"
             alt="Sarkin Mota Autos logo"
             width={40}
             height={40}
-            className="h-10 w-10 object-contain"
+            className={`object-contain ${overlayMode ? "h-12 w-12 lg:h-14 lg:w-14" : "h-10 w-10"}`}
             priority
           />
         </Link>
@@ -112,41 +161,136 @@ export default function Navbar() {
           Menu
         </button>
 
-        <nav className="hidden flex-1 items-center justify-end gap-6 lg:flex">
-          {megaMenuGroups.map((group) => (
-            <button
-              key={group.id}
-              type="button"
-              onMouseEnter={() => setOpenMenuId(group.id)}
-              onFocus={() => setOpenMenuId(group.id)}
-              className={`inline-flex items-center gap-1 text-sm font-semibold uppercase tracking-wide transition ${
-                openMenuId === group.id ? "text-brand" : "text-white/85 hover:text-white"
-              }`}
-            >
-              {group.label}
-              <span className="text-xs">{openMenuId === group.id ? "^" : "v"}</span>
-            </button>
-          ))}
+        {overlayMode ? (
+          <nav className="hidden flex-1 items-center lg:flex">
+            <div className="grid w-full grid-cols-[1fr_auto_1fr] items-center gap-4">
+              <div className="flex items-center gap-4 justify-self-start xl:gap-6">
+              {leftDesktopGroups.map((group) => (
+                <button
+                  key={group.id}
+                  type="button"
+                  onMouseEnter={() => setOpenMenuId(group.id)}
+                  onFocus={() => setOpenMenuId(group.id)}
+                  className={`inline-flex items-center gap-1 text-[13px] font-semibold uppercase tracking-wide drop-shadow-[0_1px_2px_rgba(0,0,0,0.85)] transition xl:text-sm ${
+                    openMenuId === group.id ? "text-brand" : "text-white hover:text-white"
+                  }`}
+                >
+                  {group.label}
+                  <ChevronIcon open={openMenuId === group.id} />
+                </button>
+              ))}
+              </div>
 
-          {singleNavLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="text-sm font-semibold uppercase tracking-wide text-white/85 transition hover:text-white"
-              onClick={() => {
-                setOpenMenuId(null);
-                setMobileOpen(false);
-                setMobileOpenMenuId(null);
-              }}
-            >
-              {link.label}
-            </Link>
-          ))}
-
-          {staff ? (
-            <>
               <Link
-                href="/admin"
+                href="/"
+                className="flex items-center justify-center justify-self-center"
+                onClick={() => {
+                  setOpenMenuId(null);
+                  setMobileOpen(false);
+                  setMobileOpenMenuId(null);
+                }}
+              >
+                <Image
+                  src="/assets/imgi_1_brand-logo-light.webp"
+                  alt="Sarkin Mota Autos logo"
+                  width={56}
+                  height={56}
+                  className="h-11 w-11 object-contain xl:h-14 xl:w-14"
+                  priority
+                />
+              </Link>
+
+              <div className="flex items-center gap-4 justify-self-end xl:gap-6">
+              {sellSwapGroup ? (
+                <button
+                  type="button"
+                  onMouseEnter={() => setOpenMenuId(sellSwapGroup.id)}
+                  onFocus={() => setOpenMenuId(sellSwapGroup.id)}
+                  className={`inline-flex items-center gap-1 text-[13px] font-semibold uppercase tracking-wide drop-shadow-[0_1px_2px_rgba(0,0,0,0.85)] transition xl:text-sm ${
+                    openMenuId === sellSwapGroup.id ? "text-brand" : "text-white hover:text-white"
+                  }`}
+                >
+                  {sellSwapGroup.label}
+                  <ChevronIcon open={openMenuId === sellSwapGroup.id} />
+                </button>
+              ) : null}
+
+              {overlaySingleNavLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="text-[13px] font-semibold uppercase tracking-wide text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.85)] transition hover:text-white xl:text-sm"
+                  onClick={() => {
+                    setOpenMenuId(null);
+                    setMobileOpen(false);
+                    setMobileOpenMenuId(null);
+                  }}
+                >
+                  {link.label}
+                </Link>
+              ))}
+              </div>
+            </div>
+          </nav>
+        ) : (
+          <nav className="hidden flex-1 items-center justify-end gap-6 lg:flex">
+            {megaMenuGroups.map((group) => (
+              <button
+                key={group.id}
+                type="button"
+                onMouseEnter={() => setOpenMenuId(group.id)}
+                onFocus={() => setOpenMenuId(group.id)}
+                className={`inline-flex items-center gap-1 text-sm font-semibold uppercase tracking-wide transition ${
+                  openMenuId === group.id ? "text-brand" : "text-white/85 hover:text-white"
+                }`}
+              >
+                {group.label}
+                <ChevronIcon open={openMenuId === group.id} />
+              </button>
+            ))}
+
+            {singleNavLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="text-sm font-semibold uppercase tracking-wide text-white/85 transition hover:text-white"
+                onClick={() => {
+                  setOpenMenuId(null);
+                  setMobileOpen(false);
+                  setMobileOpenMenuId(null);
+                }}
+              >
+                {link.label}
+              </Link>
+            ))}
+
+            {staff ? (
+              <>
+                <Link
+                  href="/admin"
+                  className="rounded-lg border border-white/15 px-3 py-2 text-sm font-semibold text-white transition hover:border-brand hover:text-brand"
+                  onClick={() => {
+                    setOpenMenuId(null);
+                    setMobileOpen(false);
+                    setMobileOpenMenuId(null);
+                  }}
+                >
+                  Dashboard
+                </Link>
+                <span className="rounded-lg border border-white/15 px-3 py-2 text-xs text-white/90">
+                  {staff.name}
+                </span>
+                <button
+                  type="button"
+                  onClick={logout}
+                  className="rounded-lg border border-white/15 px-3 py-2 text-sm font-semibold text-white transition hover:border-brand hover:text-brand"
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              <Link
+                href="/login"
                 className="rounded-lg border border-white/15 px-3 py-2 text-sm font-semibold text-white transition hover:border-brand hover:text-brand"
                 onClick={() => {
                   setOpenMenuId(null);
@@ -154,33 +298,11 @@ export default function Navbar() {
                   setMobileOpenMenuId(null);
                 }}
               >
-                Dashboard
+                Login
               </Link>
-              <span className="rounded-lg border border-white/15 px-3 py-2 text-xs text-white/90">
-                {staff.name}
-              </span>
-              <button
-                type="button"
-                onClick={logout}
-                className="rounded-lg border border-white/15 px-3 py-2 text-sm font-semibold text-white transition hover:border-brand hover:text-brand"
-              >
-                Logout
-              </button>
-            </>
-          ) : (
-            <Link
-              href="/login"
-              className="rounded-lg border border-white/15 px-3 py-2 text-sm font-semibold text-white transition hover:border-brand hover:text-brand"
-              onClick={() => {
-                setOpenMenuId(null);
-                setMobileOpen(false);
-                setMobileOpenMenuId(null);
-              }}
-            >
-              Login
-            </Link>
-          )}
-        </nav>
+            )}
+          </nav>
+        )}
       </div>
 
       {openMenu ? (

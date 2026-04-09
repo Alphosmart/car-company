@@ -158,6 +158,7 @@ export const megaMenuGroups: MegaMenuGroup[] = [
 ];
 
 export const singleNavLinks = [
+  { href: "/blog", label: "Blog" },
   { href: "/news-events", label: "News and Events" },
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact Us" },

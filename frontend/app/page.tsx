@@ -1,6 +1,7 @@
 import Link from "next/link";
 import HomeHeroCarousel from "@/components/home/HomeHeroCarousel";
 import { formatNaira, getCars, getCompanyProfile, getPromoBanner } from "@/lib/api";
+import { blogPosts } from "@/lib/blog";
 
 export default async function Home() {
   const featuredCars = await getCars({ featured: "true", limit: "6" });
@@ -101,6 +102,27 @@ export default async function Home() {
             <article key={item.name} className="rounded-2xl border border-black/10 bg-white p-4">
               <p className="text-sm text-ink-muted">&quot;{item.text}&quot;</p>
               <p className="mt-3 text-sm font-semibold">{item.name}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="mt-10 rounded-3xl border border-black/10 bg-surface p-6 sm:p-8">
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-2xl font-bold">From the Blog</h2>
+          <Link href="/blog" className="text-sm font-semibold text-brand">
+            View all posts
+          </Link>
+        </div>
+        <div className="grid gap-4 md:grid-cols-3">
+          {blogPosts.slice(0, 3).map((post) => (
+            <article key={post.slug} className="rounded-2xl border border-black/10 bg-white p-4">
+              <p className="text-xs uppercase tracking-wide text-ink-muted">{post.category}</p>
+              <h3 className="mt-2 text-lg font-semibold">{post.title}</h3>
+              <p className="mt-2 text-sm text-ink-muted">{post.excerpt}</p>
+              <Link href={`/blog/${post.slug}`} className="mt-3 inline-block text-sm font-semibold text-brand">
+                Read article
+              </Link>
             </article>
           ))}
         </div>

@@ -214,7 +214,7 @@ export const defaultCompanySettings: CompanySettings = {
   contact: {
     phone: "+234 801 234 5678",
     email: "info@sarkinmotaautos.com",
-    address: "Plot 14, Auto Market Road, Abuja",
+    address: "Central Area, Abuja",
     hours: "Mon-Sat, 9:00AM - 6:00PM",
     whatsappNumber: "09133225255",
     whatsappMessage: "Hi, I would like to ask about your available cars.",

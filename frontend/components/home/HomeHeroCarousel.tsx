@@ -21,7 +21,7 @@ export default function HomeHeroCarousel({ slides }: HomeHeroCarouselProps) {
         mediaType: "video" as const,
         title: "Sarkin Mota Autos Showcase",
         subtitle: "Premium rides. Trusted process. Fast delivery.",
-        description: "Meet Dr. Aliyu Muhammed of Sarkin Mota Autos\nAn award-winning automobile brand redefining the driving experience.",
+        description: "Meet Dr. Aliyu Uhammed of Sarkin Mota Autos\nAn award-winning automobile brand redefining the driving experience.",
       },
     ];
   }, [slides]);
@@ -57,7 +57,7 @@ export default function HomeHeroCarousel({ slides }: HomeHeroCarouselProps) {
 
   return (
     <section className="relative left-1/2 right-1/2 w-screen -translate-x-1/2 overflow-hidden bg-black">
-      <div className="relative mx-auto min-h-[520px] w-full max-w-[1600px] sm:min-h-[580px] lg:min-h-[680px]">
+      <div className="relative min-h-[520px] w-full sm:min-h-[580px] lg:min-h-[680px]">
         {active.mediaType === "video" ? (
           <video
             key={active.id}
@@ -81,7 +81,6 @@ export default function HomeHeroCarousel({ slides }: HomeHeroCarouselProps) {
 
         <div className="absolute inset-0 bg-linear-to-r from-black/72 via-black/35 to-black/25" />
         <div className="absolute inset-0 bg-linear-to-t from-black/72 via-transparent to-black/25" />
-        <div className="absolute inset-x-0 top-[76px] h-px bg-white/20" />
 
         <div className="relative z-10 flex min-h-[520px] items-end px-6 py-16 sm:min-h-[580px] sm:px-10 lg:min-h-[680px] lg:px-16 lg:py-24">
           <div className="max-w-3xl">
@@ -104,10 +103,6 @@ export default function HomeHeroCarousel({ slides }: HomeHeroCarouselProps) {
               </Link>
             </div>
           </div>
-        </div>
-
-        <div className="absolute right-4 top-4 z-20 rounded-md border border-white/20 bg-black/35 px-3 py-2 text-sm font-semibold text-white/90 backdrop-blur-sm sm:right-6 sm:top-6">
-          {String(safeIndex + 1).padStart(2, "0")} / {String(safeSlides.length).padStart(2, "0")}
         </div>
 
         {safeSlides.length > 1 ? (

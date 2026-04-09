@@ -5,6 +5,8 @@ export default async function Footer() {
   const profile = await getCompanyProfile();
   const contact = profile.settings.contact;
   const social = profile.settings.social;
+  const phoneNumber = contact.whatsappNumber;
+  const phoneHref = `tel:${phoneNumber.replace(/[^\\d+]/g, "")}`;
 
   return (
     <footer className="border-t border-black/10 bg-black px-4 py-16 text-white sm:px-6 lg:px-8">
@@ -18,8 +20,8 @@ export default async function Footer() {
             <div className="space-y-2 text-sm text-white/70">
               <p>{contact.address}</p>
               <p>
-                <a className="transition hover:text-brand" href={`tel:${contact.phone.replace(/[^\\d+]/g, "")}`}>
-                  {contact.phone}
+                <a className="transition hover:text-brand" href={phoneHref}>
+                  {phoneNumber}
                 </a>
               </p>
               <p>
@@ -34,6 +36,7 @@ export default async function Footer() {
             <h3 className="mb-6 text-sm font-semibold uppercase tracking-widest text-brand">Explore</h3>
             <ul className="space-y-3 text-sm text-white/70">
               <li><Link href="/cars" className="transition hover:text-brand">Browse Inventory</Link></li>
+              <li><Link href="/blog" className="transition hover:text-brand">Blog</Link></li>
               <li><Link href="/about" className="transition hover:text-brand">About Us</Link></li>
               <li><Link href="/contact" className="transition hover:text-brand">Contact</Link></li>
               <li><Link href="/news-events" className="transition hover:text-brand">News and Events</Link></li>
