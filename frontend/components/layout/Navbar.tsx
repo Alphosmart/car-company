@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { megaMenuGroups, singleNavLinks } from "@/lib/navigation";
 
@@ -55,7 +54,6 @@ function readStoredStaff(): StaffProfile | null {
 }
 
 export default function Navbar() {
-  const pathname = usePathname();
   const [staff, setStaff] = useState<StaffProfile | null>(null);
   const [openMenuId, setOpenMenuId] = useState<(typeof megaMenuGroups)[number]["id"] | null>(
     null,
@@ -65,11 +63,9 @@ export default function Navbar() {
   const [mobileOpenMenuId, setMobileOpenMenuId] = useState<
     (typeof megaMenuGroups)[number]["id"] | null
   >(null);
-  const isHomePage = pathname === "/";
-  const overlayMode = isHomePage && !scrolled;
+  const overlayMode = !scrolled;
   const sellSwapGroup = megaMenuGroups.find((group) => group.id === "sell-swap") ?? null;
   const leftDesktopGroups = megaMenuGroups.filter((group) => group.id !== "sell-swap");
-  const overlaySingleNavLinks = singleNavLinks.filter((link) => link.href !== "/blog");
 
   const openMenu = useMemo(
     () => megaMenuGroups.find((group) => group.id === openMenuId) ?? null,
@@ -89,11 +85,6 @@ export default function Navbar() {
   }, []);
 
   useEffect(() => {
-    if (!isHomePage) {
-      setScrolled(false);
-      return;
-    }
-
     const onScroll = () => setScrolled(window.scrollY > 96);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
@@ -101,7 +92,7 @@ export default function Navbar() {
     return () => {
       window.removeEventListener("scroll", onScroll);
     };
-  }, [isHomePage]);
+  }, []);
 
   const logout = () => {
     window.localStorage.removeItem("token");
@@ -215,7 +206,7 @@ export default function Navbar() {
                 </button>
               ) : null}
 
-              {overlaySingleNavLinks.map((link) => (
+              {singleNavLinks.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
