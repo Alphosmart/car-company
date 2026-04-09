@@ -10,6 +10,7 @@ const adminLinks = [
   { href: "/admin/leads", label: "Leads CRM" },
   { href: "/admin/customers", label: "Customers" },
   { href: "/admin/marketing", label: "Marketing" },
+  { href: "/admin/requests", label: "Requests" },
   { href: "/admin/company", label: "Company" },
   { href: "/admin/staff", label: "Staff" },
 ];

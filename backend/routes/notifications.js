@@ -138,4 +138,169 @@ router.post("/promo-banner", async (req, res) => {
   }
 });
 
+router.get("/requests", async (req, res) => {
+  try {
+    const { requestType, status, page = 1, limit = 20 } = req.query;
+
+    const where = {
+      channel: "web",
+      context: { startsWith: "request:" },
+    };
+
+    if (status) {
+      where.status = status;
+    }
+
+    if (requestType) {
+      where.context = `request:${requestType}`;
+    }
+
+    const skip = (parseInt(page, 10) - 1) * parseInt(limit, 10);
+
+    const [requests, total] = await Promise.all([
+      prisma.notificationLog.findMany({
+        where,
+        skip,
+        take: parseInt(limit, 10),
+        orderBy: { createdAt: "desc" },
+      }),
+      prisma.notificationLog.count({ where }),
+    ]);
+
+    res.json({
+      requests,
+      pagination: {
+        page: parseInt(page, 10),
+        limit: parseInt(limit, 10),
+        total,
+        pages: Math.ceil(total / parseInt(limit, 10)),
+      },
+    });
+  } catch (error) {
+    console.error("Get request logs error:", error);
+    res.status(500).json({ error: "Failed to fetch request logs" });
+  }
+});
+
+router.get("/assignable-staff", async (req, res) => {
+  try {
+    const staff = await prisma.staff.findMany({
+      where: {
+        role: {
+          not: "inactive",
+        },
+      },
+      orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+      },
+    });
+
+    res.json({ staff });
+  } catch (error) {
+    console.error("Get assignable staff error:", error);
+    res.status(500).json({ error: "Failed to fetch staff list" });
+  }
+});
+
+router.patch("/requests/:id/status", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status, adminNote } = req.body;
+
+    const allowedStatuses = ["received", "in_review", "contacted", "resolved", "closed"];
+    if (!status || !allowedStatuses.includes(status)) {
+      return res.status(400).json({ error: "Invalid status value" });
+    }
+
+    const existing = await prisma.notificationLog.findUnique({
+      where: { id },
+      select: { payload: true },
+    });
+
+    if (!existing) {
+      return res.status(404).json({ error: "Request log not found" });
+    }
+
+    const nextPayload =
+      existing.payload && typeof existing.payload === "object"
+        ? { ...existing.payload }
+        : {};
+
+    if (typeof adminNote === "string") {
+      nextPayload.adminNote = adminNote.trim();
+    }
+
+    const requestLog = await prisma.notificationLog.update({
+      where: { id },
+      data: {
+        status,
+        payload: nextPayload,
+      },
+    });
+
+    res.json(requestLog);
+  } catch (error) {
+    if (error.code === "P2025") {
+      return res.status(404).json({ error: "Request log not found" });
+    }
+
+    console.error("Update request log status error:", error);
+    res.status(500).json({ error: "Failed to update request status" });
+  }
+});
+
+router.patch("/requests/:id/assign", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { staffId } = req.body;
+
+    const existing = await prisma.notificationLog.findUnique({
+      where: { id },
+      select: { payload: true },
+    });
+
+    if (!existing) {
+      return res.status(404).json({ error: "Request log not found" });
+    }
+
+    const nextPayload =
+      existing.payload && typeof existing.payload === "object"
+        ? { ...existing.payload }
+        : {};
+
+    if (!staffId) {
+      nextPayload.assignee = null;
+    } else {
+      const staff = await prisma.staff.findUnique({
+        where: { id: staffId },
+        select: { id: true, name: true, email: true, role: true },
+      });
+
+      if (!staff) {
+        return res.status(404).json({ error: "Staff not found" });
+      }
+
+      nextPayload.assignee = staff;
+    }
+
+    const requestLog = await prisma.notificationLog.update({
+      where: { id },
+      data: { payload: nextPayload },
+    });
+
+    res.json(requestLog);
+  } catch (error) {
+    if (error.code === "P2025") {
+      return res.status(404).json({ error: "Request log not found" });
+    }
+
+    console.error("Assign request log error:", error);
+    res.status(500).json({ error: "Failed to assign request" });
+  }
+});
+
 module.exports = router;

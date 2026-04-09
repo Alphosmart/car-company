@@ -9,6 +9,8 @@ export type Car = {
   fuelType: string;
   transmission: string;
   color: string;
+  vehicleType: string;
+  segment?: string | null;
   description?: string | null;
   status: string;
   photos: string[];
@@ -22,6 +24,8 @@ export type CarQueryParams = {
   condition?: string;
   fuelType?: string;
   transmission?: string;
+  vehicleType?: string;
+  segment?: string;
   minPrice?: string;
   maxPrice?: string;
   minYear?: string;

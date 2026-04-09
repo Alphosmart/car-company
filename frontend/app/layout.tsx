@@ -20,6 +20,10 @@ const spaceGrotesk = Space_Grotesk({
 export const metadata: Metadata = {
   title: "Sarkin Mota Autos",
   description: "Find quality used and new cars with trusted support.",
+  icons: {
+    icon: "/assets/imgi_1_brand-logo-light.webp",
+    apple: "/assets/imgi_1_brand-logo-light.webp",
+  },
 };
 
 export default function RootLayout({

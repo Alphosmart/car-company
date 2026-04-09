@@ -17,6 +17,8 @@ type CarItem = {
   fuelType: string;
   transmission: string;
   color: string;
+  vehicleType: string;
+  segment: string;
   description?: string | null;
   status: string;
   photos: string[];
@@ -34,6 +36,8 @@ type CarFormState = {
   fuelType: string;
   transmission: string;
   color: string;
+  vehicleType: string;
+  segment: string;
   description: string;
   status: string;
   featured: boolean;
@@ -54,6 +58,8 @@ const emptyForm: CarFormState = {
   fuelType: "petrol",
   transmission: "automatic",
   color: "",
+  vehicleType: "car",
+  segment: "",
   description: "",
   status: "available",
   featured: false,
@@ -164,6 +170,8 @@ function AdminCarsPageContent() {
       fuelType: car.fuelType,
       transmission: car.transmission,
       color: car.color,
+      vehicleType: car.vehicleType || "car",
+      segment: car.segment || "",
       description: car.description || "",
       status: car.status,
       featured: car.featured,
@@ -266,6 +274,8 @@ function AdminCarsPageContent() {
       price: Number(form.price),
       mileage: Number(form.mileage),
       featured: form.featured,
+      vehicleType: form.vehicleType,
+      segment: form.segment || null,
     };
 
     try {
@@ -395,6 +405,20 @@ function AdminCarsPageContent() {
                 <Input label="Color" value={form.color} onChange={(value) => setForm({ ...form, color: value })} />
               </div>
               <div className="grid gap-3 sm:grid-cols-2">
+                <Select
+                  label="Vehicle Type"
+                  value={form.vehicleType}
+                  onChange={(value) => setForm({ ...form, vehicleType: value })}
+                  options={["car", "bike", "van-bus"]}
+                />
+                <Select
+                  label="Vehicle Segment"
+                  value={form.segment}
+                  onChange={(value) => setForm({ ...form, segment: value })}
+                  options={["", "executive", "sport-performance", "luxury-suv", "daily-luxury"]}
+                />
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2">
                 <Select label="Condition" value={form.condition} onChange={(value) => setForm({ ...form, condition: value })} options={["new", "used"]} />
                 <Select label="Fuel Type" value={form.fuelType} onChange={(value) => setForm({ ...form, fuelType: value })} options={["petrol", "diesel", "hybrid", "electric"]} />
               </div>
@@ -497,12 +521,13 @@ function AdminCarsPageContent() {
             ) : null}
 
             <div className="mt-4 overflow-x-auto">
-              <table className="w-full min-w-[760px] text-left text-sm">
+              <table className="w-full min-w-190 text-left text-sm">
                 <thead>
                   <tr className="border-b border-black/10 text-ink-muted">
                     <th className="py-2">
                       <input
                         type="checkbox"
+                        aria-label="Select all cars"
                         checked={cars.length > 0 && selectedIds.length === cars.length}
                         onChange={(event) => {
                           setSelectedIds(event.target.checked ? cars.map((car) => car.id) : []);
@@ -521,6 +546,7 @@ function AdminCarsPageContent() {
                       <td className="py-3">
                         <input
                           type="checkbox"
+                          aria-label={`Select ${car.year} ${car.make} ${car.model}`}
                           checked={selectedIds.includes(car.id)}
                           onChange={() => toggleSelected(car.id)}
                         />

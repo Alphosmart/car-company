@@ -12,6 +12,8 @@ export default async function CarsPage({ searchParams }: CarsPageProps) {
   const condition = typeof params.condition === "string" ? params.condition : "";
   const fuelType = typeof params.fuelType === "string" ? params.fuelType : "";
   const transmission = typeof params.transmission === "string" ? params.transmission : "";
+  const segment = typeof params.segment === "string" ? params.segment : "";
+  const vehicleType = typeof params.vehicleType === "string" ? params.vehicleType : "";
   const minPrice = typeof params.minPrice === "string" ? params.minPrice : "";
   const maxPrice = typeof params.maxPrice === "string" ? params.maxPrice : "";
   const minYear = typeof params.minYear === "string" ? params.minYear : "";
@@ -26,6 +28,8 @@ export default async function CarsPage({ searchParams }: CarsPageProps) {
     condition,
     fuelType,
     transmission,
+    segment,
+    vehicleType,
     minPrice,
     maxPrice,
     minYear,
@@ -44,6 +48,8 @@ export default async function CarsPage({ searchParams }: CarsPageProps) {
     if (condition) query.set("condition", condition);
     if (fuelType) query.set("fuelType", fuelType);
     if (transmission) query.set("transmission", transmission);
+    if (segment) query.set("segment", segment);
+    if (vehicleType) query.set("vehicleType", vehicleType);
     if (minPrice) query.set("minPrice", minPrice);
     if (maxPrice) query.set("maxPrice", maxPrice);
     if (minYear) query.set("minYear", minYear);
@@ -107,6 +113,29 @@ export default async function CarsPage({ searchParams }: CarsPageProps) {
           <option value="available">Available</option>
           <option value="reserved">Reserved</option>
           <option value="sold">Sold</option>
+        </select>
+        <select
+          name="segment"
+          defaultValue={segment}
+          title="Filter by vehicle segment"
+          className="rounded-lg border border-black/15 px-3 py-2"
+        >
+          <option value="">Any segment</option>
+          <option value="executive">Executive Class</option>
+          <option value="sport-performance">Sport and Performance</option>
+          <option value="luxury-suv">Luxury SUVs</option>
+          <option value="daily-luxury">Daily Luxury</option>
+        </select>
+        <select
+          name="vehicleType"
+          defaultValue={vehicleType}
+          title="Filter by vehicle type"
+          className="rounded-lg border border-black/15 px-3 py-2"
+        >
+          <option value="">Any vehicle type</option>
+          <option value="car">Car</option>
+          <option value="bike">Bike</option>
+          <option value="van-bus">Van or Bus</option>
         </select>
         <input
           name="minPrice"

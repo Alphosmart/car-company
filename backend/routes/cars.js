@@ -15,6 +15,8 @@ router.get("/", async (req, res) => {
       status,
       condition,
       make,
+      segment,
+      vehicleType,
       minPrice,
       maxPrice,
       minYear,
@@ -32,6 +34,8 @@ router.get("/", async (req, res) => {
     if (status) where.status = status;
     if (condition) where.condition = condition;
     if (make) where.make = { contains: make, mode: "insensitive" };
+    if (segment) where.segment = segment;
+    if (vehicleType) where.vehicleType = vehicleType;
     if (minPrice) where.price = { gte: parseFloat(minPrice) };
     if (maxPrice) {
       where.price = { ...where.price, lte: parseFloat(maxPrice) };
@@ -119,6 +123,8 @@ router.post("/", authMiddleware, roleCheck(["admin"]), async (req, res) => {
       fuelType,
       transmission,
       color,
+      vehicleType = "car",
+      segment,
       description,
       featured,
     } = req.body;
@@ -138,6 +144,8 @@ router.post("/", authMiddleware, roleCheck(["admin"]), async (req, res) => {
         fuelType,
         transmission,
         color,
+        vehicleType,
+        segment: segment || null,
         description,
         featured: featured === "true" || featured === true,
         photos: [],

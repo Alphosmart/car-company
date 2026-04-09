@@ -17,6 +17,8 @@ model Car {
   fuelType     String
   transmission String
   color        String
+  vehicleType  String   @default("car")
+  segment      String?
   description  String?
   status       String   @default("available")
   photos       String[]
