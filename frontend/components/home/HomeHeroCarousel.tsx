@@ -21,7 +21,7 @@ export default function HomeHeroCarousel({ slides }: HomeHeroCarouselProps) {
         mediaType: "video" as const,
         title: "Sarkin Mota Autos Showcase",
         subtitle: "Premium rides. Trusted process. Fast delivery.",
-        description: "Meet Dr. Aliyu Uhammed of Sarkin Mota Autos\nAn award-winning automobile brand redefining the driving experience.",
+        description: "Meet Dr. Aliyu Muhammed of Sarkin Mota Autos\nAn award-winning automobile brand redefining the driving experience.",
       },
     ];
   }, [slides]);

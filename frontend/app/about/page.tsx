@@ -29,7 +29,7 @@ export default async function AboutPage() {
           profile.team.map((member) => <TeamCard key={`${member.name}-${member.role}`} name={member.name} role={member.role} />)
         ) : (
           <>
-            <TeamCard name="Dr. Aliyu Uhammed" role="Founder and CEO" />
+            <TeamCard name="Dr. Aliyu Muhammed" role="Founder and CEO" />
             <TeamCard name="Aisha Bello" role="Sales Manager" />
             <TeamCard name="Chinedu Okafor" role="Customer Success" />
           </>
