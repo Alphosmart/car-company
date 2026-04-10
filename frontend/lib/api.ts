@@ -263,10 +263,10 @@ function normalizeCompanySettings(rawSettings: unknown): CompanySettings {
     social?: Partial<CompanySocialSettings>;
   };
 
-  const financeSource = source.finance || {};
-  const contactSource = source.contact || {};
-  const homepageSource = source.homepage || {};
-  const socialSource = source.social || {};
+  const financeSource = (source.finance || {}) as Partial<CompanyFinanceSettings>;
+  const contactSource = (source.contact || {}) as Partial<CompanyContactSettings>;
+  const homepageSource = (source.homepage || {}) as Partial<CompanyHomepageSettings>;
+  const socialSource = (source.social || {}) as Partial<CompanySocialSettings>;
 
   const trustCards = Array.isArray(homepageSource.trustCards)
     ? homepageSource.trustCards
