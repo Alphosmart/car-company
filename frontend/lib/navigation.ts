@@ -162,6 +162,7 @@ export const singleNavLinks = [
   { href: "/news-events", label: "News and Events" },
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact Us" },
+  { href: "/login", label: "Login" },
 ] as const;
 
 export const toolsPageContent: Record<
